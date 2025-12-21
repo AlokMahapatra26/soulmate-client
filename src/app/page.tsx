@@ -4,6 +4,7 @@ import { useState } from 'react';
 import SearchBar from '@/components/SearchBar';
 import TrackList from '@/components/TrackList';
 import Player from '@/components/Player';
+import Lyrics from '@/components/Lyrics';
 import { Track, searchMusic } from '@/lib/api';
 
 export default function Home() {
@@ -13,6 +14,8 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [showLyrics, setShowLyrics] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
 
   const handleSearch = async (query: string) => {
     setIsLoading(true);
@@ -48,6 +51,14 @@ export default function Home() {
     const prevIndex = currentIndex <= 0 ? tracks.length - 1 : currentIndex - 1;
     setCurrentIndex(prevIndex);
     setCurrentTrack(tracks[prevIndex]);
+  };
+
+  const handleTimeUpdate = (time: number) => {
+    setCurrentTime(time);
+  };
+
+  const handleLyricsToggle = () => {
+    setShowLyrics(!showLyrics);
   };
 
   return (
@@ -96,6 +107,16 @@ export default function Home() {
         track={currentTrack}
         onNext={handleNext}
         onPrevious={handlePrevious}
+        onTimeUpdate={handleTimeUpdate}
+        onLyricsToggle={handleLyricsToggle}
+        showLyrics={showLyrics}
+      />
+
+      <Lyrics
+        track={currentTrack}
+        currentTime={currentTime}
+        isVisible={showLyrics}
+        onClose={() => setShowLyrics(false)}
       />
     </div>
   );
