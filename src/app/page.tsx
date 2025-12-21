@@ -1,65 +1,102 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import SearchBar from '@/components/SearchBar';
+import TrackList from '@/components/TrackList';
+import Player from '@/components/Player';
+import { Track, searchMusic } from '@/lib/api';
 
 export default function Home() {
+  const [tracks, setTracks] = useState<Track[]>([]);
+  const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(-1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleSearch = async (query: string) => {
+    setIsLoading(true);
+    setError(null);
+    setHasSearched(true);
+
+    try {
+      const results = await searchMusic(query);
+      setTracks(results);
+    } catch (err) {
+      setError('Unable to search. Please check if the server is running.');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleTrackSelect = (track: Track) => {
+    const index = tracks.findIndex((t) => t.id === track.id);
+    setCurrentTrack(track);
+    setCurrentIndex(index);
+  };
+
+  const handleNext = () => {
+    if (tracks.length === 0) return;
+    const nextIndex = (currentIndex + 1) % tracks.length;
+    setCurrentIndex(nextIndex);
+    setCurrentTrack(tracks[nextIndex]);
+  };
+
+  const handlePrevious = () => {
+    if (tracks.length === 0) return;
+    const prevIndex = currentIndex <= 0 ? tracks.length - 1 : currentIndex - 1;
+    setCurrentIndex(prevIndex);
+    setCurrentTrack(tracks[prevIndex]);
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+    <div className="app-container">
+      <header className="header">
+        <h1 className="logo">
+          SOUL<span className="logo-accent">MATE</span>
+        </h1>
+      </header>
+
+      <main className="main-content">
+        <SearchBar onSearch={handleSearch} isLoading={isLoading} />
+
+        {error && (
+          <div style={{
+            padding: '12px 16px',
+            background: 'rgba(239, 68, 68, 0.1)',
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            borderRadius: '10px',
+            marginBottom: '24px',
+            fontSize: '13px',
+            color: '#ef4444'
+          }}>
+            {error}
+          </div>
+        )}
+
+        {isLoading ? (
+          <div className="loading">
+            <div className="loading-spinner" />
+          </div>
+        ) : hasSearched && tracks.length === 0 && !error ? (
+          <div className="empty-state">
+            <p className="empty-text">No results found. Try a different search.</p>
+          </div>
+        ) : (
+          <TrackList
+            tracks={tracks}
+            currentTrack={currentTrack}
+            onTrackSelect={handleTrackSelect}
+          />
+        )}
       </main>
+
+      <Player
+        track={currentTrack}
+        onNext={handleNext}
+        onPrevious={handlePrevious}
+      />
     </div>
   );
 }
