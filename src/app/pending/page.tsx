@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { Clock } from 'lucide-react';
 
 export default function PendingPage() {
     const { user, logout } = useAuth();
@@ -14,13 +15,6 @@ export default function PendingPage() {
             router.push('/app');
         }
     }, [user, router]);
-
-    const ClockIcon = () => (
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-        </svg>
-    );
 
     return (
         <div className="auth-container">
@@ -35,7 +29,7 @@ export default function PendingPage() {
                 {/* Pending Status */}
                 <div className="pending-content">
                     <div className="pending-icon">
-                        <ClockIcon />
+                        <Clock size={64} strokeWidth={1.5} />
                     </div>
 
                     <h2 className="pending-title">Account Pending Approval</h2>

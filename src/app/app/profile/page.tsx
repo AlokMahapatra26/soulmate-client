@@ -2,7 +2,6 @@
 
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 
 export default function ProfilePage() {
     const router = useRouter();
@@ -11,12 +10,12 @@ export default function ProfilePage() {
     if (!user) return null;
 
     return (
-        <div className="page-container">
-            <div className="page-header">
+        <div className="content-page">
+            <div className="page-header-inline">
                 <h1 className="page-title">Profile</h1>
             </div>
 
-            <div className="profile-card">
+            <div className="profile-card-inline">
                 <div className="profile-avatar">
                     {user.name.charAt(0).toUpperCase()}
                 </div>
@@ -52,10 +51,6 @@ export default function ProfilePage() {
                         Sign Out
                     </button>
                 </div>
-            </div>
-
-            <div className="page-nav">
-                <Link href="/app" className="back-link">← Back to Player</Link>
             </div>
         </div>
     );

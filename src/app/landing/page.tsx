@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { Music, FileText, ListMusic, Users } from 'lucide-react';
 
 export default function LandingPage() {
     const router = useRouter();
@@ -36,25 +37,33 @@ export default function LandingPage() {
                 {/* Features */}
                 <div className="landing-features">
                     <div className="feature-card">
-                        <div className="feature-icon">🎵</div>
+                        <div className="feature-icon">
+                            <Music size={48} strokeWidth={1.5} />
+                        </div>
                         <h3>Stream Millions of Songs</h3>
                         <p>Access a vast library of music from around the world</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">📝</div>
+                        <div className="feature-icon">
+                            <FileText size={48} strokeWidth={1.5} />
+                        </div>
                         <h3>Synced Lyrics</h3>
                         <p>Sing along with real-time synchronized lyrics</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">💾</div>
+                        <div className="feature-icon">
+                            <ListMusic size={48} strokeWidth={1.5} />
+                        </div>
                         <h3>Create Playlists</h3>
                         <p>Organize your favorite tracks into custom playlists</p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">👥</div>
+                        <div className="feature-icon">
+                            <Users size={48} strokeWidth={1.5} />
+                        </div>
                         <h3>Connect with Friends</h3>
                         <p>Share your musical journey with friends</p>
                     </div>

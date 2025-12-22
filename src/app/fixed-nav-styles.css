@@ -1,0 +1,28 @@
+/* App Wrapper with Fixed Navbar */
+.app-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.fixed-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.app-content {
+    margin-top: 60px;
+    /* Height of fixed navbar */
+    flex: 1;
+    min-height: calc(100vh - 60px);
+}
+
+.navbar-link.active {
+    color: var(--red);
+    background: var(--red-dim);
+}
+
+/* Rest of existing styles... */

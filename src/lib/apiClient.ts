@@ -55,6 +55,9 @@ export const playlistsAPI = {
     getPlaylists: () =>
         apiClient.get('/api/playlists'),
 
+    getPlaylist: (id: string) =>
+        apiClient.get(`/api/playlists/${id}`),
+
     createPlaylist: (data: { name: string; description?: string; isPublic?: string }) =>
         apiClient.post('/api/playlists', data),
 

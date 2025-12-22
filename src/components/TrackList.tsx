@@ -1,7 +1,10 @@
 'use client';
 
-import { Track, getDownloadUrl } from '@/lib/api';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Track } from '@/lib/api';
+import { getDownloadUrl } from '@/lib/api';
+import { likesAPI, playlistsAPI } from '@/lib/apiClient';
+import { Heart, ListPlus, Plus, Download } from 'lucide-react';
 
 interface TrackListProps {
     tracks: Track[];
@@ -10,98 +13,139 @@ interface TrackListProps {
     onAddToQueue: (track: Track) => void;
 }
 
-// Icons
-const MusicIcon = () => (
-    <svg width="64" height="64" viewBox="0 0 24 24" fill="currentColor" opacity="0.15">
-        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-    </svg>
-);
-
-const ThreeDotsIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <circle cx="12" cy="5" r="2" />
-        <circle cx="12" cy="12" r="2" />
-        <circle cx="12" cy="19" r="2" />
-    </svg>
-);
-
-const AddToQueueIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-);
-
-const DownloadIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-        <polyline points="7 10 12 15 17 10" />
-        <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
-);
-
 export default function TrackList({ tracks, currentTrack, onTrackSelect, onAddToQueue }: TrackListProps) {
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+    const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
+    const [playlists, setPlaylists] = useState<any[]>([]);
+    const [showPlaylistModal, setShowPlaylistModal] = useState(false);
+    const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState<Track | null>(null);
 
-    const handleDownload = (track: Track) => {
-        const downloadUrl = getDownloadUrl(track);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.style.display = 'none';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+    useEffect(() => {
+        fetchLikedTracks();
+        fetchPlaylists();
+    }, []);
+
+    const fetchLikedTracks = async () => {
+        try {
+            const response = await likesAPI.getLikedSongs();
+            const likedIds = new Set(response.data.map((song: any) => song.trackId));
+            setLikedTracks(likedIds);
+        } catch (err) {
+            console.error('Failed to fetch liked tracks');
+        }
+    };
+
+    const fetchPlaylists = async () => {
+        try {
+            const response = await playlistsAPI.getPlaylists();
+            setPlaylists(response.data);
+        } catch (err) {
+            console.error('Failed to fetch playlists');
+        }
+    };
+
+    const handleLike = async (track: Track) => {
+        try {
+            if (likedTracks.has(track.id)) {
+                await likesAPI.unlikeSong(track.id);
+                setLikedTracks(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(track.id);
+                    return newSet;
+                });
+            } else {
+                await likesAPI.likeSong({
+                    trackId: track.id,
+                    title: track.title,
+                    artist: track.artist,
+                    thumbnail: track.thumbnail,
+                    duration: track.duration,
+                });
+                setLikedTracks(prev => new Set(prev).add(track.id));
+            }
+            setOpenMenuId(null);
+        } catch (err: any) {
+            alert(err.response?.data?.error || 'Failed to like song');
+        }
+    };
+
+    const handleAddToPlaylist = (track: Track) => {
+        setSelectedTrackForPlaylist(track);
+        setShowPlaylistModal(true);
         setOpenMenuId(null);
     };
 
-    const toggleMenu = (e: React.MouseEvent, trackId: string) => {
-        e.stopPropagation();
+    const handlePlaylistSelect = async (playlistId: string) => {
+        if (!selectedTrackForPlaylist) return;
+
+        try {
+            await playlistsAPI.addTrack(playlistId, {
+                trackId: selectedTrackForPlaylist.id,
+                title: selectedTrackForPlaylist.title,
+                artist: selectedTrackForPlaylist.artist,
+                thumbnail: selectedTrackForPlaylist.thumbnail,
+                duration: selectedTrackForPlaylist.duration,
+            });
+            setShowPlaylistModal(false);
+            setSelectedTrackForPlaylist(null);
+            alert('Added to playlist!');
+        } catch (err: any) {
+            alert(err.response?.data?.error || 'Failed to add to playlist');
+        }
+    };
+
+    const handleDownload = async (track: Track) => {
+        try {
+            const url = await getDownloadUrl(track.id);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${track.title} - ${track.artist}.mp3`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        } catch (error) {
+            console.error('Download failed:', error);
+            alert('Download failed. Please try again.');
+        }
+        setOpenMenuId(null);
+    };
+
+    const toggleMenu = (trackId: string) => {
         setOpenMenuId(openMenuId === trackId ? null : trackId);
     };
 
     if (tracks.length === 0) {
-        return (
-            <div className="empty-state">
-                <div className="empty-icon">
-                    <MusicIcon />
-                </div>
-                <p className="empty-text">Search for your favorite music</p>
-            </div>
-        );
+        return null;
     }
 
     return (
-        <div className="track-list">
-            {tracks.map((track) => (
-                <div
-                    key={track.id}
-                    className={`track-item ${currentTrack?.id === track.id ? 'active' : ''}`}
-                >
-                    <img
-                        src={track.thumbnail || '/placeholder.png'}
-                        alt=""
-                        className="track-thumbnail"
-                        loading="lazy"
-                        onClick={() => onTrackSelect(track)}
-                        onError={(e) => {
-                            const img = e.target as HTMLImageElement;
-                            img.style.background = 'var(--black-80)';
-                            img.src = '';
-                        }}
-                    />
-                    <div className="track-info" onClick={() => onTrackSelect(track)}>
-                        <div className="track-title">{track.title}</div>
-                        <div className="track-artist">{track.artist}</div>
-                    </div>
-                    <div className="track-actions">
-                        <div className="track-duration">{track.duration}</div>
+        <>
+            <div className="track-list">
+                {tracks.map((track) => (
+                    <div
+                        key={track.id}
+                        className={`track-item ${currentTrack?.id === track.id ? 'active' : ''}`}
+                    >
+                        <img
+                            src={track.thumbnail}
+                            alt={track.title}
+                            className="track-thumbnail"
+                            onClick={() => onTrackSelect(track)}
+                        />
+                        <div className="track-info" onClick={() => onTrackSelect(track)}>
+                            <h3 className="track-title">{track.title}</h3>
+                            <p className="track-artist">{track.artist}</p>
+                        </div>
+                        <span className="track-duration">{track.duration}</span>
+
+                        {/* Three-dots menu */}
                         <div className="track-menu-container">
                             <button
-                                className="track-action-btn"
-                                onClick={(e) => toggleMenu(e, track.id)}
-                                title="More options"
+                                className="track-menu-button"
+                                onClick={() => toggleMenu(track.id)}
+                                aria-label="Track options"
                             >
-                                <ThreeDotsIcon />
+                                ⋮
                             </button>
 
                             {openMenuId === track.id && (
@@ -113,32 +157,78 @@ export default function TrackList({ tracks, currentTrack, onTrackSelect, onAddTo
                                     <div className="track-menu">
                                         <button
                                             className="track-menu-item"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
+                                            onClick={() => handleLike(track)}
+                                        >
+                                            <Heart
+                                                size={16}
+                                                fill={likedTracks.has(track.id) ? 'currentColor' : 'none'}
+                                            />
+                                            {likedTracks.has(track.id) ? 'Unlike' : 'Like'}
+                                        </button>
+                                        <button
+                                            className="track-menu-item"
+                                            onClick={() => handleAddToPlaylist(track)}
+                                        >
+                                            <ListPlus size={16} />
+                                            Add to Playlist
+                                        </button>
+                                        <button
+                                            className="track-menu-item"
+                                            onClick={() => {
                                                 onAddToQueue(track);
                                                 setOpenMenuId(null);
                                             }}
                                         >
-                                            <AddToQueueIcon />
-                                            <span>Add to Queue</span>
+                                            <Plus size={16} />
+                                            Add to Queue
                                         </button>
                                         <button
                                             className="track-menu-item"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleDownload(track);
-                                            }}
+                                            onClick={() => handleDownload(track)}
                                         >
-                                            <DownloadIcon />
-                                            <span>Download</span>
+                                            <Download size={16} />
+                                            Download
                                         </button>
                                     </div>
                                 </>
                             )}
                         </div>
                     </div>
+                ))}
+            </div>
+
+            {/* Playlist Selection Modal */}
+            {showPlaylistModal && (
+                <div className="modal-overlay" onClick={() => setShowPlaylistModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="modal-title">Add to Playlist</h2>
+                        {playlists.length === 0 ? (
+                            <p className="empty-text">No playlists yet. Create one first!</p>
+                        ) : (
+                            <div className="playlist-select-list">
+                                {playlists.map(playlist => (
+                                    <button
+                                        key={playlist.id}
+                                        className="playlist-select-item"
+                                        onClick={() => handlePlaylistSelect(playlist.id)}
+                                    >
+                                        <span>{playlist.name}</span>
+                                        <span className="text-muted">→</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                        <div className="modal-actions">
+                            <button
+                                onClick={() => setShowPlaylistModal(false)}
+                                className="btn-secondary"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
                 </div>
-            ))}
-        </div>
+            )}
+        </>
     );
 }

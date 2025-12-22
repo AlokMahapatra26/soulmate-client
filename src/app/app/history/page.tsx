@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { historyAPI } from '@/lib/apiClient';
-import Link from 'next/link';
 
 export default function HistoryPage() {
     const [history, setHistory] = useState<any[]>([]);
@@ -24,8 +23,8 @@ export default function HistoryPage() {
     };
 
     return (
-        <div className="page-container">
-            <div className="page-header">
+        <div className="content-page">
+            <div className="page-header-inline">
                 <div>
                     <h1 className="page-title">Listening History</h1>
                     <p className="page-subtitle">Your recently played tracks</p>
@@ -56,10 +55,6 @@ export default function HistoryPage() {
                     ))}
                 </div>
             )}
-
-            <div className="page-nav">
-                <Link href="/app" className="back-link">← Back to Player</Link>
-            </div>
         </div>
     );
 }

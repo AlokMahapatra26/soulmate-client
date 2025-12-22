@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { likesAPI } from '@/lib/apiClient';
-import Link from 'next/link';
+import { useMusic } from '@/contexts/MusicContext';
+import { Trash2 } from 'lucide-react';
 
 export default function LikedPage() {
+    const music = useMusic();
     const [likedSongs, setLikedSongs] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -23,7 +25,8 @@ export default function LikedPage() {
         }
     };
 
-    const handleUnlike = async (trackId: string) => {
+    const handleUnlike = async (trackId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
         try {
             await likesAPI.unlikeSong(trackId);
             setLikedSongs(likedSongs.filter(song => song.trackId !== trackId));
@@ -32,9 +35,20 @@ export default function LikedPage() {
         }
     };
 
+    const handlePlayTrack = (song: any) => {
+        const track = {
+            id: song.trackId,
+            title: song.title,
+            artist: song.artist,
+            thumbnail: song.thumbnail,
+            duration: song.duration,
+        };
+        music.playTrack(track);
+    };
+
     return (
-        <div className="page-container">
-            <div className="page-header">
+        <div className="content-page">
+            <div className="page-header-inline">
                 <div>
                     <h1 className="page-title">Liked Songs</h1>
                     <p className="page-subtitle">{likedSongs.length} songs</p>
@@ -50,7 +64,11 @@ export default function LikedPage() {
             ) : (
                 <div className="list-container">
                     {likedSongs.map(song => (
-                        <div key={song.id} className="list-item">
+                        <div
+                            key={song.id}
+                            className={`list-item clickable ${music.currentTrack?.id === song.trackId ? 'playing' : ''}`}
+                            onClick={() => handlePlayTrack(song)}
+                        >
                             <img src={song.thumbnail} alt={song.title} className="list-item-image" />
                             <div className="list-item-info">
                                 <h3 className="list-item-title">{song.title}</h3>
@@ -58,18 +76,18 @@ export default function LikedPage() {
                             </div>
                             <div className="list-item-meta">
                                 <span className="text-muted">{song.duration}</span>
-                                <button onClick={() => handleUnlike(song.trackId)} className="btn-icon-danger" title="Unlike">
-                                    ♥
+                                <button
+                                    onClick={(e) => handleUnlike(song.trackId, e)}
+                                    className="btn-icon-danger"
+                                    title="Unlike"
+                                >
+                                    <Trash2 size={16} />
                                 </button>
                             </div>
                         </div>
                     ))}
                 </div>
             )}
-
-            <div className="page-nav">
-                <Link href="/app" className="back-link">← Back to Player</Link>
-            </div>
         </div>
     );
 }

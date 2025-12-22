@@ -1,0 +1,38 @@
+/* Clickable tracks */
+.clickable {
+    cursor: pointer;
+}
+
+.list-item.clickable:hover {
+    background: var(--black-80);
+}
+
+.playlist-track-item.clickable:hover {
+    background: var(--black-60);
+}
+
+.list-item.playing {
+    background: var(--red-dim);
+    border-color: var(--red);
+}
+
+.playlist-track-item.playing {
+    background: var(--red-dim);
+}
+
+.playing-icon {
+    color: var(--red);
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.5;
+    }
+}

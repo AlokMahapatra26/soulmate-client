@@ -1,15 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { playlistsAPI } from '@/lib/apiClient';
-import { useAuth } from '@/contexts/AuthContext';
-import Link from 'next/link';
+import { useMusic } from '@/contexts/MusicContext';
+import { ChevronDown, ChevronRight, Trash2, Plus } from 'lucide-react';
 
 export default function PlaylistsPage() {
-    const router = useRouter();
-    const { user } = useAuth();
+    const music = useMusic();
     const [playlists, setPlaylists] = useState<any[]>([]);
+    const [expandedPlaylistId, setExpandedPlaylistId] = useState<string | null>(null);
+    const [playlistTracks, setPlaylistTracks] = useState<{ [key: string]: any[] }>({});
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newPlaylistName, setNewPlaylistName] = useState('');
@@ -27,6 +27,29 @@ export default function PlaylistsPage() {
             console.error('Failed to fetch playlists:', err);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchPlaylistTracks = async (playlistId: string) => {
+        if (playlistTracks[playlistId]) return;
+
+        try {
+            const response = await playlistsAPI.getPlaylist(playlistId);
+            setPlaylistTracks(prev => ({
+                ...prev,
+                [playlistId]: response.data.tracks || []
+            }));
+        } catch (err) {
+            console.error('Failed to fetch playlist tracks:', err);
+        }
+    };
+
+    const togglePlaylist = (playlistId: string) => {
+        if (expandedPlaylistId === playlistId) {
+            setExpandedPlaylistId(null);
+        } else {
+            setExpandedPlaylistId(playlistId);
+            fetchPlaylistTracks(playlistId);
         }
     };
 
@@ -53,15 +76,54 @@ export default function PlaylistsPage() {
         }
     };
 
+    const handleRemoveTrack = async (playlistId: string, trackId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        try {
+            await playlistsAPI.removeTrack(playlistId, trackId);
+            const response = await playlistsAPI.getPlaylist(playlistId);
+            setPlaylistTracks(prev => ({
+                ...prev,
+                [playlistId]: response.data.tracks || []
+            }));
+        } catch (err) {
+            console.error('Failed to remove track:', err);
+        }
+    };
+
+    const handlePlayTrack = (playlistId: string, track: any, allTracks: any[]) => {
+        // Convert all tracks to Track format
+        const queueTracks = allTracks.map(t => ({
+            id: t.trackId,
+            title: t.title,
+            artist: t.artist,
+            thumbnail: t.thumbnail,
+            duration: t.duration,
+        }));
+
+        // Set the entire playlist as queue
+        music.setQueue(queueTracks);
+
+        // Play the clicked track
+        const trackToPlay = {
+            id: track.trackId,
+            title: track.title,
+            artist: track.artist,
+            thumbnail: track.thumbnail,
+            duration: track.duration,
+        };
+        music.playTrack(trackToPlay);
+    };
+
     return (
-        <div className="page-container">
+        <div className="playlists-page">
             <div className="page-header">
                 <div>
                     <h1 className="page-title">My Playlists</h1>
                     <p className="page-subtitle">Create and manage your music collections</p>
                 </div>
                 <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-                    + Create Playlist
+                    <Plus size={16} />
+                    Create Playlist
                 </button>
             </div>
 
@@ -72,19 +134,62 @@ export default function PlaylistsPage() {
                     <p className="empty-text">No playlists yet. Create one to get started!</p>
                 </div>
             ) : (
-                <div className="grid-container">
+                <div className="playlists-list">
                     {playlists.map(playlist => (
-                        <div key={playlist.id} className="card">
-                            <div className="card-header">
-                                <h3 className="card-title">{playlist.name}</h3>
-                                <button onClick={() => handleDeletePlaylist(playlist.id)} className="btn-icon-danger">×</button>
+                        <div key={playlist.id} className="playlist-box">
+                            <div className="playlist-header" onClick={() => togglePlaylist(playlist.id)}>
+                                <div className="playlist-info-section">
+                                    <button className="playlist-toggle">
+                                        {expandedPlaylistId === playlist.id ?
+                                            <ChevronDown size={20} /> : <ChevronRight size={20} />
+                                        }
+                                    </button>
+                                    <div>
+                                        <h3 className="playlist-name">{playlist.name}</h3>
+                                        {playlist.description && (
+                                            <p className="playlist-desc">{playlist.description}</p>
+                                        )}
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }}
+                                    className="playlist-delete"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
                             </div>
-                            {playlist.description && <p className="card-subtitle">{playlist.description}</p>}
-                            <div className="card-footer">
-                                <span className="text-muted">
-                                    {new Date(playlist.createdAt).toLocaleDateString()}
-                                </span>
-                            </div>
+
+                            {expandedPlaylistId === playlist.id && (
+                                <div className="playlist-tracks">
+                                    {!playlistTracks[playlist.id] ? (
+                                        <div className="loading-small">Loading tracks...</div>
+                                    ) : playlistTracks[playlist.id].length === 0 ? (
+                                        <div className="empty-tracks">No tracks in this playlist yet</div>
+                                    ) : (
+                                        playlistTracks[playlist.id].map((track: any) => (
+                                            <div
+                                                key={track.id}
+                                                className={`playlist-track-item clickable ${music.currentTrack?.id === track.trackId ? 'playing' : ''}`}
+                                                onClick={() => handlePlayTrack(playlist.id, track, playlistTracks[playlist.id])}
+                                            >
+                                                <img src={track.thumbnail} alt={track.title} className="track-thumb" />
+                                                <div className="track-details">
+                                                    <h4 className="track-name">{track.title}</h4>
+                                                    <p className="track-artist-name">{track.artist}</p>
+                                                </div>
+                                                <span className="track-time">{track.duration}</span>
+                                                <button
+                                                    onClick={(e) => handleRemoveTrack(playlist.id, track.trackId, e)}
+                                                    className="remove-track-btn"
+                                                    title="Remove from playlist"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
                         </div>
                     ))}
                 </div>
@@ -126,10 +231,6 @@ export default function PlaylistsPage() {
                     </div>
                 </div>
             )}
-
-            <div className="page-nav">
-                <Link href="/app" className="back-link">← Back to Player</Link>
-            </div>
         </div>
     );
 }
