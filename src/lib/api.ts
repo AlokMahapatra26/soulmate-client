@@ -78,3 +78,12 @@ export async function getLyrics(
     return response.json();
 }
 
+export function getDownloadUrl(track: Track): string {
+    const params = new URLSearchParams({
+        title: track.title,
+        artist: track.artist,
+    });
+    return `${API_BASE}/api/music/download/${track.id}?${params}`;
+}
+
+

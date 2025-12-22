@@ -734,3 +734,49 @@ body {
     font-size: 18px;
   }
 }
+
+/* ===== DOWNLOAD BUTTON ===== */
+.track-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-full);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.download-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.download-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.download-btn.downloading {
+  color: var(--accent);
+}
+
+.loading-spinner.small {
+  width: 16px;
+  height: 16px;
+  border-width: 2px;
+}
