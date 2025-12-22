@@ -1,0 +1,469 @@
+/* Authentication Pages */
+.auth-container,
+.landing-container,
+.loading-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--black);
+    padding: var(--space-6);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 420px;
+    background: var(--black-90);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    padding: var(--space-10);
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--space-8);
+}
+
+.auth-logo {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: var(--space-2);
+}
+
+.logo-accent {
+    color: var(--red);
+}
+
+.auth-subtitle {
+    font-size: 14px;
+    color: var(--white-60);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.form-group label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--white-90);
+}
+
+.form-input {
+    padding: var(--space-3) var(--space-4);
+    background: var(--black-80);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    font-family: var(--font);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.form-input::placeholder {
+    color: var(--white-40);
+}
+
+.form-input:focus {
+    border-color: var(--red);
+    background: var(--black-70);
+}
+
+.form-input:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-button {
+    padding: var(--space-3) var(--space-6);
+    background: var(--red);
+    border: none;
+    border-radius: var(--radius-md);
+    color: var(--white);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: var(--space-2);
+}
+
+.auth-button:hover:not(:disabled) {
+    background: var(--red-hover);
+}
+
+.auth-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.auth-button.secondary {
+    background: transparent;
+    border: 1px solid var(--white-10);
+    color: var(--white);
+}
+
+.auth-button.secondary:hover:not(:disabled) {
+    background: var(--white-10);
+}
+
+.auth-error {
+    padding: var(--space-3) var(--space-4);
+    background: var(--red-dim);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-md);
+    color: var(--red);
+    font-size: 13px;
+}
+
+.auth-footer {
+    text-align: center;
+    margin-top: var(--space-6);
+    font-size: 13px;
+    color: var(--white-60);
+}
+
+.auth-link {
+    color: var(--red);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.auth-link:hover {
+    color: var(--red-hover);
+}
+
+.auth-back {
+    text-align: center;
+    margin-top: var(--space-4);
+}
+
+.back-link {
+    font-size: 13px;
+    color: var(--white-40);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.back-link:hover {
+    color: var(--white-60);
+}
+
+/* Landing Page */
+.landing-content {
+    max-width: 1200px;
+    width: 100%;
+    text-align: center;
+}
+
+.landing-brand {
+    margin-bottom: var(--space-10);
+}
+
+.landing-logo {
+    font-size: 56px;
+    font-weight: 700;
+    letter-spacing: -2px;
+    margin-bottom: var(--space-3);
+}
+
+.landing-tagline {
+    font-size: 18px;
+    color: var(--white-60);
+}
+
+.landing-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--space-6);
+    margin: var(--space-10) 0;
+}
+
+.feature-card {
+    padding: var(--space-8);
+    background: var(--black-90);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    transition: all 0.2s;
+}
+
+.feature-card:hover {
+    border-color: var(--red);
+    transform: translateY(-4px);
+}
+
+.feature-icon {
+    font-size: 48px;
+    margin-bottom: var(--space-4);
+}
+
+.feature-card h3 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: var(--space-2);
+    color: var(--white);
+}
+
+.feature-card p {
+    font-size: 14px;
+    color: var(--white-60);
+    line-height: 1.6;
+}
+
+.landing-cta {
+    display: flex;
+    gap: var(--space-4);
+    justify-content: center;
+    margin: var(--space-10) 0;
+}
+
+.cta-button {
+    padding: var(--space-4) var(--space-8);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 160px;
+}
+
+.cta-primary {
+    background: var(--red);
+    color: var(--white);
+}
+
+.cta-primary:hover {
+    background: var(--red-hover);
+    transform: translateY(-2px);
+}
+
+.cta-secondary {
+    background: transparent;
+    border: 1px solid var(--white-10);
+    color: var(--white);
+}
+
+.cta-secondary:hover {
+    background: var(--white-10);
+    transform: translateY(-2px);
+}
+
+.landing-footer {
+    margin-top: var(--space-10);
+    font-size: 13px;
+    color: var(--white-40);
+}
+
+/* Pending Page */
+.pending-content {
+    text-align: center;
+    padding: var(--space-6) 0;
+}
+
+.pending-icon {
+    color: var(--red);
+    margin-bottom: var(--space-6);
+    display: flex;
+    justify-content: center;
+}
+
+.pending-title {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: var(--space-4);
+    color: var(--white);
+}
+
+.pending-message {
+    font-size: 14px;
+    color: var(--white-60);
+    line-height: 1.6;
+    margin-bottom: var(--space-3);
+}
+
+.pending-info {
+    margin: var(--space-6) 0;
+    padding: var(--space-5);
+    background: var(--black-80);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--white-10);
+    text-align: left;
+}
+
+.pending-info p {
+    font-size: 13px;
+    color: var(--white-60);
+    margin: var(--space-2) 0;
+}
+
+.pending-info strong {
+    color: var(--white);
+    font-weight: 500;
+    margin-right: var(--space-2);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 2px var(--space-2);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background: rgba(234, 179, 8, 0.1);
+    color: #eab308;
+}
+
+.pending-actions {
+    margin-top: var(--space-6);
+}
+
+/* Loading State */
+.loading-container {
+    background: var(--black);
+}
+
+/* Admin Page */
+.admin-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--black);
+}
+
+.admin-content {
+    flex: 1;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--space-10) var(--space-6);
+}
+
+.admin-header {
+    margin-bottom: var(--space-8);
+}
+
+.admin-header h2 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: var(--space-2);
+    color: var(--white);
+}
+
+.admin-header p {
+    font-size: 14px;
+    color: var(--white-60);
+}
+
+.admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.admin-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-5);
+    background: var(--black-90);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-lg);
+    gap: var(--space-6);
+}
+
+.admin-card-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--white);
+    margin-bottom: var(--space-1);
+}
+
+.admin-card-info p {
+    font-size: 14px;
+    color: var(--white-60);
+    margin-bottom: var(--space-2);
+}
+
+.admin-card-date {
+    font-size: 12px;
+    color: var(--white-40);
+}
+
+.admin-card-actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-shrink: 0;
+}
+
+.admin-button {
+    padding: var(--space-2) var(--space-5);
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.admin-button.approve {
+    background: var(--red);
+    color: var(--white);
+}
+
+.admin-button.approve:hover {
+    background: var(--red-hover);
+}
+
+.admin-button.reject {
+    background: transparent;
+    border: 1px solid var(--white-10);
+    color: var(--white);
+}
+
+.admin-button.reject:hover {
+    background: var(--white-10);
+}
+
+.nav-button {
+    padding: var(--space-2) var(--space-4);
+    background: transparent;
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    font-family: var(--font);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-button:hover {
+    background: var(--white-10);
+}
+
+.nav-button.secondary {
+    border-color: var(--red);
+    color: var(--red);
+}
+
+.nav-button.secondary:hover {
+    background: var(--red-dim);
+}
