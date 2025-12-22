@@ -6,6 +6,7 @@ export interface Track {
     artist: string;
     duration: string;
     thumbnail: string;
+    thumbnailHD: string;
 }
 
 export interface StreamInfo {

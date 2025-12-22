@@ -55,13 +55,19 @@ const LyricsIcon = () => (
     </svg>
 );
 
+const FullscreenIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" />
+    </svg>
+);
+
 interface PlayerProps {
     track: Track | null;
     onNext?: () => void;
     onPrevious?: () => void;
     onTimeUpdate?: (time: number) => void;
-    onLyricsToggle?: () => void;
-    showLyrics?: boolean;
+    onAudioReady?: (audio: HTMLAudioElement | null) => void;
+    onPlayingStateChange?: (isPlaying: boolean) => void;
 }
 
 export default function Player({
@@ -69,8 +75,8 @@ export default function Player({
     onNext,
     onPrevious,
     onTimeUpdate,
-    onLyricsToggle,
-    showLyrics = false,
+    onAudioReady,
+    onPlayingStateChange,
 }: PlayerProps) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -84,6 +90,13 @@ export default function Player({
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Expose audio element to parent
+    useEffect(() => {
+        if (onAudioReady) {
+            onAudioReady(audioRef.current);
+        }
+    }, [onAudioReady, mounted]);
 
     const loadTrack = useCallback(async () => {
         if (!track || !audioRef.current) return;
@@ -128,7 +141,11 @@ export default function Player({
         } else {
             audioRef.current.play();
         }
-        setIsPlaying(!isPlaying);
+        const newPlayingState = !isPlaying;
+        setIsPlaying(newPlayingState);
+        if (onPlayingStateChange) {
+            onPlayingStateChange(newPlayingState);
+        }
     };
 
     const handleTimeUpdate = () => {
@@ -218,8 +235,14 @@ export default function Player({
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
                 onEnded={handleEnded}
-                onPlay={() => setIsPlaying(true)}
-                onPause={() => setIsPlaying(false)}
+                onPlay={() => {
+                    setIsPlaying(true);
+                    if (onPlayingStateChange) onPlayingStateChange(true);
+                }}
+                onPause={() => {
+                    setIsPlaying(false);
+                    if (onPlayingStateChange) onPlayingStateChange(false);
+                }}
             />
 
             <div className="player-track">
@@ -269,15 +292,6 @@ export default function Player({
                 <div className="volume-slider" onClick={handleVolumeClick}>
                     <div className="volume-fill" style={{ width: `${volume * 100}%` }} />
                 </div>
-                {onLyricsToggle && (
-                    <button
-                        className={`lyrics-button ${showLyrics ? 'active' : ''}`}
-                        onClick={onLyricsToggle}
-                        title="Show lyrics"
-                    >
-                        <LyricsIcon />
-                    </button>
-                )}
             </div>
         </div>
     );
