@@ -99,6 +99,9 @@ export const historyAPI = {
 
     addToHistory: (track: any) =>
         apiClient.post('/api/history', track),
+
+    deleteHistoryItem: (id: string) =>
+        apiClient.delete(`/api/history/${id}`),
 };
 
 // Friends API

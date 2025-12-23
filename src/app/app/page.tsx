@@ -13,13 +13,13 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, searchType: 'music' | 'video' = 'music') => {
     setIsLoading(true);
     setError(null);
     setHasSearched(true);
 
     try {
-      const results = await searchMusic(query);
+      const results = await searchMusic(query, searchType);
       setTracks(results);
     } catch (err) {
       setError('Unable to search. Please check if the server is running.');

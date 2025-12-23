@@ -322,6 +322,98 @@
     flex-shrink: 0;
 }
 
+.list-item-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-shrink: 0;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.list-item:hover .list-item-actions {
+    opacity: 1;
+}
+
+.list-action-btn {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: var(--white-60);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.list-action-btn:hover {
+    background: var(--white-10);
+    color: var(--white);
+}
+
+.list-action-btn.play-btn:hover {
+    background: var(--red-dim);
+    color: var(--red);
+}
+
+.list-action-btn.delete-btn:hover {
+    background: var(--red-dim);
+    color: var(--red);
+}
+
+.list-action-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.list-item-image.clickable {
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.list-item-image.clickable:hover {
+    opacity: 0.8;
+}
+
+.mini-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--white-20);
+    border-top-color: var(--red);
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+}
+
+/* Load More */
+.load-more-container {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-6) 0;
+}
+
+.load-more-btn {
+    padding: var(--space-3) var(--space-8);
+    background: var(--black-90);
+    border: 1px solid var(--white-10);
+    border-radius: var(--radius-md);
+    color: var(--white);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.load-more-btn:hover {
+    background: var(--black-80);
+    border-color: var(--red);
+    color: var(--red);
+}
+
+
 /* Modal */
 .modal-overlay {
     position: fixed;

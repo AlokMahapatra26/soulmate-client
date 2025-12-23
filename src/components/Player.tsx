@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Track, getStreamUrl, getDownloadUrl } from '@/lib/api';
+import { Track, getStreamUrl, getDownloadUrl, getVideoDetails, VideoDetails } from '@/lib/api';
 import { useMusic } from '@/contexts/MusicContext';
 import { likesAPI, playlistsAPI, historyAPI } from '@/lib/apiClient';
 
@@ -112,6 +112,14 @@ const SpeedIcon = () => (
     </svg>
 );
 
+const InfoIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="16" x2="12" y2="12" />
+        <line x1="12" y1="8" x2="12.01" y2="8" />
+    </svg>
+);
+
 
 interface PlayerProps {
     track: Track | null;
@@ -145,6 +153,9 @@ export default function Player({
     const [isLiked, setIsLiked] = useState(false);
     const [showPlaylistModal, setShowPlaylistModal] = useState(false);
     const [playlists, setPlaylists] = useState<any[]>([]);
+    const [showInfoModal, setShowInfoModal] = useState(false);
+    const [videoDetails, setVideoDetails] = useState<VideoDetails | null>(null);
+    const [loadingDetails, setLoadingDetails] = useState(false);
 
 
 
@@ -317,6 +328,20 @@ export default function Player({
         setPlaybackSpeed(nextSpeed);
         if (audioRef.current) {
             audioRef.current.playbackRate = nextSpeed;
+        }
+    };
+
+    const handleShowInfo = async () => {
+        if (!track) return;
+        setShowInfoModal(true);
+        setLoadingDetails(true);
+        try {
+            const details = await getVideoDetails(track.id);
+            setVideoDetails(details);
+        } catch (error) {
+            console.error('Error fetching video details:', error);
+        } finally {
+            setLoadingDetails(false);
         }
     };
 
@@ -528,6 +553,14 @@ export default function Player({
                 >
                     <VideoIcon />
                 </button>
+                <button
+                    className="extra-button"
+                    onClick={handleShowInfo}
+                    title="Track Info"
+                    disabled={!track}
+                >
+                    <InfoIcon />
+                </button>
             </div>
 
             <div className="player-volume">
@@ -578,6 +611,78 @@ export default function Player({
                     </div>
                 </div>
             )}
+
+            {/* Info Modal */}
+            {showInfoModal && (
+                <div className="modal-overlay" onClick={() => setShowInfoModal(false)}>
+                    <div className="modal-content info-modal" onClick={(e) => e.stopPropagation()}>
+                        <h3>Track Details</h3>
+                        {loadingDetails ? (
+                            <div className="loading">
+                                <div className="loading-spinner" />
+                            </div>
+                        ) : videoDetails ? (
+                            <div className="info-content">
+                                <div className="info-thumbnail">
+                                    <img src={videoDetails.thumbnailHD} alt={videoDetails.title} />
+                                </div>
+                                <div className="info-section">
+                                    <h4 className="info-title">{videoDetails.title}</h4>
+                                </div>
+                                <div className="info-section">
+                                    <label>Channel</label>
+                                    <p>{videoDetails.channelName}</p>
+                                </div>
+                                {videoDetails.subscriberCount && (
+                                    <div className="info-section">
+                                        <label>Subscribers</label>
+                                        <p>{formatNumber(videoDetails.subscriberCount)}</p>
+                                    </div>
+                                )}
+                                {videoDetails.viewCount && (
+                                    <div className="info-section">
+                                        <label>Views</label>
+                                        <p>{formatNumber(videoDetails.viewCount)} views</p>
+                                    </div>
+                                )}
+                                {videoDetails.likeCount && (
+                                    <div className="info-section">
+                                        <label>Likes</label>
+                                        <p>{formatNumber(videoDetails.likeCount)}</p>
+                                    </div>
+                                )}
+                                {videoDetails.uploadDate && (
+                                    <div className="info-section">
+                                        <label>Upload Date</label>
+                                        <p>{videoDetails.uploadDate}</p>
+                                    </div>
+                                )}
+                                {videoDetails.description && (
+                                    <div className="info-section">
+                                        <label>Description</label>
+                                        <p className="info-description">{videoDetails.description}</p>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <p className="empty-text">Failed to load track details</p>
+                        )}
+                        <button className="modal-close-btn" onClick={() => setShowInfoModal(false)}>
+                            Close
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
+}
+
+// Helper function to format large numbers
+function formatNumber(num: string | number): string {
+    const n = typeof num === 'string' ? parseInt(num) : num;
+    if (isNaN(n)) return num.toString();
+    if (n >= 1000000000) return (n / 1000000000).toFixed(1) + 'B';
+    if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M';
+    if (n >= 1000) return (n / 1000).toFixed(1) + 'K';
+    return n.toString();
 }

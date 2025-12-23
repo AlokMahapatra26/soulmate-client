@@ -31,10 +31,27 @@ export interface LyricsResult {
     syncedLyrics: LyricLine[] | null;
 }
 
-export async function searchMusic(query: string): Promise<Track[]> {
-    const response = await fetch(
-        `${API_BASE}/api/music/search?q=${encodeURIComponent(query)}`
-    );
+export interface VideoDetails {
+    id: string;
+    title: string;
+    channelName: string;
+    channelId: string;
+    subscriberCount?: string;
+    viewCount?: string;
+    likeCount?: string;
+    uploadDate?: string;
+    description?: string;
+    thumbnail: string;
+    thumbnailHD: string;
+    duration?: string;
+}
+
+export async function searchMusic(query: string, searchType: 'music' | 'video' = 'music'): Promise<Track[]> {
+    const endpoint = searchType === 'video'
+        ? `${API_BASE}/api/music/search/videos?q=${encodeURIComponent(query)}`
+        : `${API_BASE}/api/music/search?q=${encodeURIComponent(query)}`;
+
+    const response = await fetch(endpoint);
 
     if (!response.ok) {
         throw new Error('Search failed');
@@ -48,6 +65,16 @@ export async function getStreamUrl(videoId: string): Promise<StreamInfo> {
 
     if (!response.ok) {
         throw new Error('Failed to get stream');
+    }
+
+    return response.json();
+}
+
+export async function getVideoDetails(videoId: string): Promise<VideoDetails> {
+    const response = await fetch(`${API_BASE}/api/music/details/${videoId}`);
+
+    if (!response.ok) {
+        throw new Error('Failed to get video details');
     }
 
     return response.json();
