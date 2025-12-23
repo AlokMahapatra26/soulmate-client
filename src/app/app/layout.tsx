@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Player from '@/components/Player';
 import NowPlaying from '@/components/NowPlaying';
 import Lyrics from '@/components/Lyrics';
+import VideoPlayer from '@/components/VideoPlayer';
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
     const router = useRouter();
@@ -118,7 +119,11 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
                     {/* Center - Page Content */}
                     <main className="main-content">
-                        {children}
+                        {music.showVideo && music.currentTrack ? (
+                            <VideoPlayer />
+                        ) : (
+                            children
+                        )}
                     </main>
 
                     {/* Right Sidebar - Lyrics */}

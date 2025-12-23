@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Track, getStreamUrl } from '@/lib/api';
+import { useMusic } from '@/contexts/MusicContext';
 
 // Icons defined outside component to prevent hydration mismatch
 const PlayIcon = () => (
@@ -61,6 +62,13 @@ const FullscreenIcon = () => (
     </svg>
 );
 
+const VideoIcon = () => (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" />
+    </svg>
+);
+
 interface PlayerProps {
     track: Track | null;
     onNext?: () => void;
@@ -78,6 +86,7 @@ export default function Player({
     onAudioReady,
     onPlayingStateChange,
 }: PlayerProps) {
+    const { showVideo, setShowVideo } = useMusic();
     const audioRef = useRef<HTMLAudioElement>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
@@ -218,6 +227,11 @@ export default function Player({
                         <span className="progress-time">0:00</span>
                     </div>
                 </div>
+                <div className="player-extras">
+                    <button className="extra-button" disabled>
+                        <VideoIcon />
+                    </button>
+                </div>
                 <div className="player-volume">
                     <VolumeIcon />
                     <div className="volume-slider">
@@ -285,6 +299,17 @@ export default function Player({
                     </div>
                     <span className="progress-time">{formatTime(duration)}</span>
                 </div>
+            </div>
+
+            <div className="player-extras">
+                <button
+                    className={`extra-button ${showVideo ? 'active' : ''}`}
+                    onClick={() => setShowVideo(!showVideo)}
+                    title={showVideo ? 'Hide Video' : 'Show Video'}
+                    disabled={!track}
+                >
+                    <VideoIcon />
+                </button>
             </div>
 
             <div className="player-volume">

@@ -97,6 +97,7 @@ export default function PlaylistsPage() {
             title: t.title,
             artist: t.artist,
             thumbnail: t.thumbnail,
+            thumbnailHD: t.thumbnailHD || t.thumbnail,
             duration: t.duration,
         }));
 
@@ -109,6 +110,7 @@ export default function PlaylistsPage() {
             title: track.title,
             artist: track.artist,
             thumbnail: track.thumbnail,
+            thumbnailHD: track.thumbnailHD || track.thumbnail,
             duration: track.duration,
         };
         music.playTrack(trackToPlay);

@@ -41,6 +41,7 @@ export default function LikedPage() {
             title: song.title,
             artist: song.artist,
             thumbnail: song.thumbnail,
+            thumbnailHD: song.thumbnailHD || song.thumbnail,
             duration: song.duration,
         };
         music.playTrack(track);
