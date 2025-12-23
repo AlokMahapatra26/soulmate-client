@@ -40,14 +40,41 @@ export const usersAPI = {
     getPending: () =>
         apiClient.get('/api/users/pending'),
 
+    getAllUsers: () =>
+        apiClient.get('/api/users/all'),
+
     approveUser: (userId: string) =>
         apiClient.put(`/api/users/${userId}/approve`),
 
     rejectUser: (userId: string) =>
         apiClient.put(`/api/users/${userId}/reject`),
 
+    revokeUser: (userId: string) =>
+        apiClient.put(`/api/users/${userId}/revoke`),
+
+    deleteUser: (userId: string) =>
+        apiClient.delete(`/api/users/${userId}`),
+
+    getUserPlaylists: (userId: string) =>
+        apiClient.get(`/api/users/${userId}/playlists`),
+
+    getUserLikes: (userId: string) =>
+        apiClient.get(`/api/users/${userId}/likes`),
+
     searchUsers: (query: string) =>
         apiClient.get(`/api/users/search/${query}`),
+};
+
+// Supporters API (admin)
+export const supportersAPI = {
+    getSupporters: () =>
+        apiClient.get('/api/supporters'),
+
+    addSupporter: (data: { name: string; amount?: string; message?: string }) =>
+        apiClient.post('/api/supporters', data),
+
+    deleteSupporter: (id: string) =>
+        apiClient.delete(`/api/supporters/${id}`),
 };
 
 // Playlists API

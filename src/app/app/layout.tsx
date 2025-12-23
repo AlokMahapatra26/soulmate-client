@@ -59,6 +59,12 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                         History
                     </Link>
+                    <Link
+                        href="/app/developer"
+                        className={`navbar-link ${isActive('/app/developer') ? 'active' : ''}`}
+                    >
+                        Developer
+                    </Link>
                     {/* <Link
                         href="/app/friends"
                         className={`navbar-link ${isActive('/app/friends') ? 'active' : ''}`}

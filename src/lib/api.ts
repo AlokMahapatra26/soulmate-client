@@ -114,4 +114,59 @@ export function getDownloadUrl(track: Track): string {
     return `${API_BASE}/api/music/download/${track.id}?${params}`;
 }
 
+// Feedback API
+export interface Feedback {
+    id: string;
+    type: 'suggestion' | 'thankyou';
+    name: string;
+    message: string;
+    createdAt: string;
+}
 
+export async function getFeedback(type?: 'suggestion' | 'thankyou'): Promise<Feedback[]> {
+    const endpoint = type
+        ? `${API_BASE}/api/feedback/${type}`
+        : `${API_BASE}/api/feedback`;
+
+    const response = await fetch(endpoint);
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch feedback');
+    }
+
+    return response.json();
+}
+
+export async function submitFeedback(data: { type: 'suggestion' | 'thankyou'; name: string; message: string }): Promise<Feedback> {
+    const response = await fetch(`${API_BASE}/api/feedback`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to submit feedback');
+    }
+
+    return response.json();
+}
+
+// Supporters API
+export interface Supporter {
+    id: string;
+    name: string;
+    amount: string | null;
+    message: string | null;
+    createdAt: string;
+}
+
+export async function getSupporters(): Promise<Supporter[]> {
+    const response = await fetch(`${API_BASE}/api/supporters`);
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch supporters');
+    }
+
+    return response.json();
+}

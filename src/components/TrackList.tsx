@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Track } from '@/lib/api';
 import { getDownloadUrl } from '@/lib/api';
 import { likesAPI, playlistsAPI } from '@/lib/apiClient';
+import { useAuth } from '@/contexts/AuthContext';
 import { Heart, ListPlus, Plus, Download } from 'lucide-react';
 
 interface TrackListProps {
@@ -14,6 +15,7 @@ interface TrackListProps {
 }
 
 export default function TrackList({ tracks, currentTrack, onTrackSelect, onAddToQueue }: TrackListProps) {
+    const { isAuthenticated } = useAuth();
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [likedTracks, setLikedTracks] = useState<Set<string>>(new Set());
     const [playlists, setPlaylists] = useState<any[]>([]);
@@ -21,17 +23,19 @@ export default function TrackList({ tracks, currentTrack, onTrackSelect, onAddTo
     const [selectedTrackForPlaylist, setSelectedTrackForPlaylist] = useState<Track | null>(null);
 
     useEffect(() => {
-        fetchLikedTracks();
-        fetchPlaylists();
-    }, []);
+        if (isAuthenticated) {
+            fetchLikedTracks();
+            fetchPlaylists();
+        }
+    }, [isAuthenticated]);
 
     const fetchLikedTracks = async () => {
         try {
             const response = await likesAPI.getLikedSongs();
-            const likedIds = new Set(response.data.map((song: any) => song.trackId));
+            const likedIds = new Set<string>(response.data.map((song: any) => song.trackId));
             setLikedTracks(likedIds);
         } catch (err) {
-            console.error('Failed to fetch liked tracks');
+            // Silently fail - user might not be authenticated
         }
     };
 
@@ -40,7 +44,7 @@ export default function TrackList({ tracks, currentTrack, onTrackSelect, onAddTo
             const response = await playlistsAPI.getPlaylists();
             setPlaylists(response.data);
         } catch (err) {
-            console.error('Failed to fetch playlists');
+            // Silently fail - user might not be authenticated
         }
     };
 
@@ -96,7 +100,7 @@ export default function TrackList({ tracks, currentTrack, onTrackSelect, onAddTo
 
     const handleDownload = async (track: Track) => {
         try {
-            const url = await getDownloadUrl(track.id);
+            const url = getDownloadUrl(track);
             const a = document.createElement('a');
             a.href = url;
             a.download = `${track.title} - ${track.artist}.mp3`;
