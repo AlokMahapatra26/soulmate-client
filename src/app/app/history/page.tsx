@@ -99,8 +99,11 @@ export default function HistoryPage() {
                                     <p className="list-item-subtitle">{item.artist}</p>
                                 </div>
                                 <div className="list-item-meta">
+                                    <span className="play-count-badge">
+                                        {item.playCount} {parseInt(item.playCount) === 1 ? 'play' : 'plays'}
+                                    </span>
                                     <span className="text-muted">
-                                        {new Date(item.playedAt).toLocaleString()}
+                                        {new Date(item.lastPlayedAt).toLocaleString()}
                                     </span>
                                 </div>
                                 <div className="list-item-actions">
