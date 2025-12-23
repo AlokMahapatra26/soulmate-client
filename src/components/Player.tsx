@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Track, getStreamUrl, getDownloadUrl } from '@/lib/api';
 import { useMusic } from '@/contexts/MusicContext';
-import { likesAPI, playlistsAPI } from '@/lib/apiClient';
+import { likesAPI, playlistsAPI, historyAPI } from '@/lib/apiClient';
 
 // Icons defined outside component to prevent hydration mismatch
 const PlayIcon = () => (
@@ -337,6 +337,28 @@ export default function Player({
         };
         checkLikedStatus();
     }, [track]);
+
+    // Add to listening history when a track starts playing
+    useEffect(() => {
+        if (!track || !isPlaying) return;
+
+        // Wait a bit to ensure the user is actually listening
+        const timer = setTimeout(async () => {
+            try {
+                await historyAPI.addToHistory({
+                    trackId: track.id,
+                    title: track.title,
+                    artist: track.artist,
+                    thumbnail: track.thumbnail,
+                    duration: track.duration,
+                });
+            } catch (error) {
+                console.error('Error adding to history:', error);
+            }
+        }, 3000); // Wait 3 seconds before adding to history
+
+        return () => clearTimeout(timer);
+    }, [track, isPlaying]);
 
 
     const progress = duration ? (currentTime / duration) * 100 : 0;
