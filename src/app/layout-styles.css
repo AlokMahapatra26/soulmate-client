@@ -18,6 +18,15 @@
     /* Space for player */
 }
 
+/* Expanded lyrics layout - Two columns */
+.app-layout.lyrics-expanded {
+    grid-template-columns: 320px 1fr;
+}
+
+.app-layout.lyrics-expanded .sidebar-right {
+    grid-column: 2;
+}
+
 /* Main Content Area */
 .main-content {
     overflow-y: auto;

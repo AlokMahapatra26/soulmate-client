@@ -639,6 +639,9 @@ body {
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--white-10);
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .lyrics-panel-header h3 {
@@ -647,11 +650,106 @@ body {
   color: var(--white);
 }
 
+.lyrics-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.lyrics-font-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--white-60);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lyrics-font-button:hover:not(:disabled) {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.lyrics-font-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.lyrics-divider {
+  width: 1px;
+  height: 24px;
+  background: var(--white-20);
+  margin: 0 var(--space-1);
+}
+
+.lyrics-align-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--white-60);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lyrics-align-button:hover {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.lyrics-align-button.active {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
+.lyrics-expand-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--white-60);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lyrics-expand-button:hover {
+  background: var(--red-dim);
+  color: var(--red);
+}
+
 .lyrics-panel-content {
   flex: 1;
   overflow-y: auto;
   padding: var(--space-6);
   scroll-behavior: smooth;
+}
+
+/* Center lyrics when expanded */
+.lyrics-panel-content.expanded {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: var(--space-10) var(--space-6);
+}
+
+.lyrics-panel-content.expanded .lyrics-synced,
+.lyrics-panel-content.expanded .lyrics-plain {
+  max-width: 900px;
+  width: 100%;
+  text-align: center;
 }
 
 .lyrics-empty,

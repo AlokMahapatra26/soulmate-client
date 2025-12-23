@@ -106,7 +106,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
 
             {/* Main Content Area with Sidebars */}
             <div className="app-main-wrapper">
-                <div className="app-layout">
+                <div className={`app-layout ${music.showExpandedLyrics ? 'lyrics-expanded' : ''}`}>
                     {/* Left Sidebar - Now Playing & Queue */}
                     <aside className="sidebar-left">
                         <NowPlaying
@@ -117,17 +117,19 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                         />
                     </aside>
 
-                    {/* Center - Page Content */}
-                    <main className="main-content">
-                        {music.showVideo && music.currentTrack ? (
-                            <VideoPlayer />
-                        ) : (
-                            children
-                        )}
-                    </main>
+                    {/* Center - Page Content (hidden when lyrics expanded) */}
+                    {!music.showExpandedLyrics && (
+                        <main className="main-content">
+                            {music.showVideo && music.currentTrack ? (
+                                <VideoPlayer />
+                            ) : (
+                                children
+                            )}
+                        </main>
+                    )}
 
                     {/* Right Sidebar - Lyrics */}
-                    <aside className="sidebar-right">
+                    <aside className={`sidebar-right ${music.showExpandedLyrics ? 'expanded' : ''}`}>
                         <Lyrics
                             track={music.currentTrack}
                             currentTime={music.currentTime}

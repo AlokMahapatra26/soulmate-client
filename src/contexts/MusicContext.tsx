@@ -10,12 +10,14 @@ interface MusicContextType {
     currentTime: number;
     audioElement: HTMLAudioElement | null;
     showVideo: boolean;
+    showExpandedLyrics: boolean;
     setCurrentTrack: (track: Track | null) => void;
     setQueue: (queue: Track[]) => void;
     setIsPlaying: (playing: boolean) => void;
     setCurrentTime: (time: number) => void;
     setAudioElement: (element: HTMLAudioElement | null) => void;
     setShowVideo: (show: boolean) => void;
+    setShowExpandedLyrics: (show: boolean) => void;
     addToQueue: (track: Track) => void;
     removeFromQueue: (trackId: string) => void;
     playNext: () => void;
@@ -32,6 +34,7 @@ export function MusicProvider({ children }: { children: ReactNode }) {
     const [currentTime, setCurrentTime] = useState(0);
     const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
     const [showVideo, setShowVideo] = useState(false);
+    const [showExpandedLyrics, setShowExpandedLyrics] = useState(false);
 
     const addToQueue = (track: Track) => {
         const isInQueue = queue.some(t => t.id === track.id);
@@ -81,12 +84,14 @@ export function MusicProvider({ children }: { children: ReactNode }) {
                 currentTime,
                 audioElement,
                 showVideo,
+                showExpandedLyrics,
                 setCurrentTrack,
                 setQueue,
                 setIsPlaying,
                 setCurrentTime,
                 setAudioElement,
                 setShowVideo,
+                setShowExpandedLyrics,
                 addToQueue,
                 removeFromQueue,
                 playNext,
