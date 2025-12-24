@@ -54,13 +54,13 @@ export default function Home() {
     return selectedLanguages[Math.floor(Math.random() * selectedLanguages.length)];
   };
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (query: string, searchType: 'music' | 'video' = 'music') => {
     setIsLoading(true);
     setHasSearched(true);
     setError(null);
 
     try {
-      const results = await searchMusic(query);
+      const results = await searchMusic(query, searchType);
       setTracks(results);
     } catch {
       setError('Unable to search. Please try again.');
