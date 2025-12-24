@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { playlistsAPI } from '@/lib/apiClient';
 import { useMusic } from '@/contexts/MusicContext';
-import { ChevronDown, ChevronRight, Trash2, Plus } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Plus, Pencil } from 'lucide-react';
 
 export default function PlaylistsPage() {
     const music = useMusic();
@@ -11,9 +11,17 @@ export default function PlaylistsPage() {
     const [expandedPlaylistId, setExpandedPlaylistId] = useState<string | null>(null);
     const [playlistTracks, setPlaylistTracks] = useState<{ [key: string]: any[] }>({});
     const [loading, setLoading] = useState(true);
+
+    // Create Modal State
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [newPlaylistName, setNewPlaylistName] = useState('');
     const [newPlaylistDesc, setNewPlaylistDesc] = useState('');
+
+    // Edit Modal State
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [editingPlaylistId, setEditingPlaylistId] = useState<string | null>(null);
+    const [editName, setEditName] = useState('');
+    const [editDesc, setEditDesc] = useState('');
 
     useEffect(() => {
         fetchPlaylists();
@@ -63,6 +71,31 @@ export default function PlaylistsPage() {
             fetchPlaylists();
         } catch (err) {
             console.error('Failed to create playlist:', err);
+        }
+    };
+
+    const handleEditClick = (playlist: any, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setEditingPlaylistId(playlist.id);
+        setEditName(playlist.name);
+        setEditDesc(playlist.description || '');
+        setShowEditModal(true);
+    };
+
+    const handleUpdatePlaylist = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!editingPlaylistId) return;
+
+        try {
+            await playlistsAPI.updatePlaylist(editingPlaylistId, {
+                name: editName,
+                description: editDesc
+            });
+            setShowEditModal(false);
+            setEditingPlaylistId(null);
+            fetchPlaylists();
+        } catch (err) {
+            console.error('Failed to update playlist:', err);
         }
     };
 
@@ -153,12 +186,22 @@ export default function PlaylistsPage() {
                                         )}
                                     </div>
                                 </div>
-                                <button
-                                    onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }}
-                                    className="playlist-delete"
-                                >
-                                    <Trash2 size={16} />
-                                </button>
+                                <div className="playlist-actions" style={{ display: 'flex', gap: '8px' }}>
+                                    <button
+                                        onClick={(e) => handleEditClick(playlist, e)}
+                                        className="playlist-delete"
+                                        title="Edit Playlist"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
+                                    <button
+                                        onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }}
+                                        className="playlist-delete"
+                                        title="Delete Playlist"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
                             </div>
 
                             {expandedPlaylistId === playlist.id && (
@@ -197,6 +240,7 @@ export default function PlaylistsPage() {
                 </div>
             )}
 
+            {/* Create Playlist Modal */}
             {showCreateModal && (
                 <div className="modal-overlay" onClick={() => setShowCreateModal(false)}>
                     <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -228,6 +272,44 @@ export default function PlaylistsPage() {
                                     Cancel
                                 </button>
                                 <button type="submit" className="btn-primary">Create</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Playlist Modal */}
+            {showEditModal && (
+                <div className="modal-overlay" onClick={() => setShowEditModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="modal-title">Edit Playlist</h2>
+                        <form onSubmit={handleUpdatePlaylist} className="modal-form">
+                            <div className="form-group">
+                                <label>Name</label>
+                                <input
+                                    type="text"
+                                    className="form-input"
+                                    value={editName}
+                                    onChange={(e) => setEditName(e.target.value)}
+                                    required
+                                    placeholder="Playlist Name"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label>Description (optional)</label>
+                                <textarea
+                                    className="form-input"
+                                    value={editDesc}
+                                    onChange={(e) => setEditDesc(e.target.value)}
+                                    placeholder="Describe your playlist..."
+                                    rows={3}
+                                />
+                            </div>
+                            <div className="modal-actions">
+                                <button type="button" onClick={() => setShowEditModal(false)} className="btn-secondary">
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn-primary">Save Changes</button>
                             </div>
                         </form>
                     </div>
