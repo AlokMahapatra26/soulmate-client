@@ -60,13 +60,13 @@ export default function LandingPage() {
                         <p>Organize your favorite tracks into custom playlists</p>
                     </div>
 
-                    <div className="feature-card">
+                    {/* <div className="feature-card">
                         <div className="feature-icon">
                             <Users size={48} strokeWidth={1.5} />
                         </div>
                         <h3>Connect with Friends</h3>
                         <p>Share your musical journey with friends</p>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* CTA Buttons */}

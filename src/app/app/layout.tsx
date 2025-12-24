@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { MusicProvider, useMusic } from '@/contexts/MusicContext';
@@ -13,9 +13,42 @@ import VideoPlayer from '@/components/VideoPlayer';
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user, logout } = useAuth();
+    const { user, isLoading, isAuthenticated, logout } = useAuth();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const music = useMusic();
+
+    // Redirect unauthenticated users
+    useEffect(() => {
+        if (!isLoading) {
+            if (!user) {
+                // Not logged in at all - redirect to login
+                router.replace('/login');
+            } else if (user.status !== 'approved') {
+                // Logged in but not approved - redirect to pending page
+                router.replace('/pending');
+            }
+        }
+    }, [user, isLoading, router]);
+
+    // Show loading state while checking auth
+    if (isLoading) {
+        return (
+            <div className="auth-loading">
+                <div className="loading-spinner"></div>
+                <p>Loading...</p>
+            </div>
+        );
+    }
+
+    // Don't render content until auth is confirmed
+    if (!user || user.status !== 'approved') {
+        return (
+            <div className="auth-loading">
+                <div className="loading-spinner"></div>
+                <p>Redirecting...</p>
+            </div>
+        );
+    }
 
     const UserIcon = () => (
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

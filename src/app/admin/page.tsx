@@ -109,7 +109,6 @@ export default function AdminPage() {
         try {
             await usersAPI.deleteUser(userId);
             setAllUsers(allUsers.filter(u => u.id !== userId));
-            setSelectedUser(null);
         } catch (err) {
             setError('Failed to delete user');
         }
