@@ -21,6 +21,14 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import { Outfit } from "next/font/google";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-outfit',
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +40,7 @@ export default function RootLayout({
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className={outfit.className}>
         <AuthProvider>
           {children}
         </AuthProvider>

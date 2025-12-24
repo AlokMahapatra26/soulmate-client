@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import { X } from 'lucide-react';
 
 export type SearchType = 'music' | 'video';
 
 interface SearchBarProps {
     onSearch: (query: string, searchType: SearchType) => void;
     isLoading: boolean;
+    onClear?: () => void;
 }
 
 // Icons defined outside component
@@ -33,7 +35,7 @@ const PodcastIcon = () => (
     </svg>
 );
 
-export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
+export default function SearchBar({ onSearch, isLoading, onClear }: SearchBarProps) {
     const [query, setQuery] = useState('');
     const [searchType, setSearchType] = useState<SearchType>('music');
 
@@ -41,6 +43,13 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
         e.preventDefault();
         if (query.trim()) {
             onSearch(query.trim(), searchType);
+        }
+    };
+
+    const handleClear = () => {
+        setQuery('');
+        if (onClear) {
+            onClear();
         }
     };
 
@@ -67,14 +76,26 @@ export default function SearchBar({ onSearch, isLoading }: SearchBarProps) {
                 </button>
             </div>
             <form onSubmit={handleSubmit} className="search-wrapper">
-                <input
-                    type="text"
-                    className="search-input"
-                    placeholder={searchType === 'music' ? "Search for songs..." : "Search for podcasts..."}
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    disabled={isLoading}
-                />
+                <div className="search-input-container">
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder={searchType === 'music' ? "Search for songs..." : "Search for podcasts..."}
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        disabled={isLoading}
+                    />
+                    {(query || onClear) && (
+                        <button
+                            type="button"
+                            className="search-clear-button"
+                            onClick={handleClear}
+                            aria-label="Clear search"
+                        >
+                            <X size={18} />
+                        </button>
+                    )}
+                </div>
                 <button
                     type="submit"
                     className="search-button"
