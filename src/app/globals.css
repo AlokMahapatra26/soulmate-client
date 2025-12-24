@@ -24,6 +24,7 @@
   --white-40: rgba(255, 255, 255, 0.4);
   --white-20: rgba(255, 255, 255, 0.2);
   --white-10: rgba(255, 255, 255, 0.1);
+  --white-5: rgba(255, 255, 255, 0.05);
 
   /* Spacing */
   --space-1: 4px;
@@ -44,6 +45,33 @@
 
   /* Typography */
   --font: var(--font-outfit), sans-serif;
+}
+
+:root[data-theme='light'] {
+  /* Light Mode - Aesthetic Clear/Beige */
+  --black: #FAFAF9;
+  /* Stone-50 (Main BG) */
+  --black-90: #FFFFFF;
+  /* White (Card BG) */
+  --black-80: #F4F4F5;
+  /* Zinc-100 (Hover) */
+  --black-70: #E4E4E7;
+  /* Zinc-200 (Active) */
+  --black-60: #D4D4D8;
+  /* Zinc-300 */
+
+  --white: #18181B;
+  /* Zinc-900 (Main Text) */
+  --white-90: rgba(24, 24, 27, 0.9);
+  --white-60: rgba(24, 24, 27, 0.6);
+  --white-40: rgba(24, 24, 27, 0.4);
+  --white-20: rgba(24, 24, 27, 0.2);
+  --white-10: rgba(24, 24, 27, 0.1);
+  --white-5: rgba(24, 24, 27, 0.05);
+
+  --red: #ef4444;
+  --red-hover: #dc2626;
+  --red-dim: rgba(239, 68, 68, 0.1);
 }
 
 /* ===== RESET & BASE ===== */

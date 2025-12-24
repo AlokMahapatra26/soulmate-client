@@ -10,12 +10,16 @@ import NowPlaying from '@/components/NowPlaying';
 import Lyrics from '@/components/Lyrics';
 import VideoPlayer from '@/components/VideoPlayer';
 
+import { useTheme } from 'next-themes';
+import { Sun, Moon } from 'lucide-react';
+
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const { user, isLoading, isAuthenticated, logout } = useAuth();
     const [showUserMenu, setShowUserMenu] = useState(false);
     const music = useMusic();
+    const { theme, setTheme } = useTheme();
 
     // Redirect unauthenticated users
     useEffect(() => {
@@ -104,11 +108,21 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                     >
                         Friends
                     </Link> */}
+
                     {user?.role === 'admin' && (
                         <Link href="/admin" className="navbar-link admin">
                             Admin
                         </Link>
                     )}
+
+                    <button
+                        className="navbar-link"
+                        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                        title="Toggle Theme"
+                        style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+                    >
+                        {theme === 'dark' ? <Sun size={20} /> : <Moon size={20} />}
+                    </button>
 
                     <div className="user-menu-container">
                         <button

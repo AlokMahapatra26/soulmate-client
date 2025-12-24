@@ -1,6 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { Providers } from "@/components/Providers";
+import { Outfit } from "next/font/google";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  display: 'swap',
+  variable: '--font-outfit',
+});
 
 export const metadata: Metadata = {
   title: "SoulMate",
@@ -21,29 +28,21 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
-import { Outfit } from "next/font/google";
-
-const outfit = Outfit({
-  subsets: ["latin"],
-  display: 'swap',
-  variable: '--font-outfit',
-});
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icon-192.png" />
       </head>
-      <body suppressHydrationWarning className={outfit.className}>
-        <AuthProvider>
+      <body className={outfit.className}>
+        <Providers>
           {children}
-        </AuthProvider>
+        </Providers>
       </body>
     </html>
   );
