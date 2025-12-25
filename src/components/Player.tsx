@@ -4,35 +4,30 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Track, getStreamUrl, getDownloadUrl, getVideoDetails, VideoDetails } from '@/lib/api';
 import { useMusic } from '@/contexts/MusicContext';
 import { likesAPI, playlistsAPI, historyAPI } from '@/lib/apiClient';
+import {
+    Play, Pause, SkipBack, SkipForward, RotateCcw, RotateCw
+} from 'lucide-react';
 
 // Icons defined outside component to prevent hydration mismatch
-const PlayIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M8 5v14l11-7z" />
-    </svg>
-);
+// Icons defined using Lucide for softer look
+// Icons defined using Lucide for softer look (Main Controls)
+const PlayIcon = () => <Play fill="currentColor" stroke="currentColor" strokeWidth={3} />;
+const PauseIcon = () => <Pause fill="currentColor" stroke="currentColor" strokeWidth={3} />;
+const PrevIcon = () => <SkipBack strokeWidth={2.5} />;
+const NextIcon = () => <SkipForward strokeWidth={2.5} />;
+const Rewind10Icon = () => <RotateCcw strokeWidth={2.5} />;
+const Forward10Icon = () => <RotateCw strokeWidth={2.5} />;
 
-const PauseIcon = () => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M6 4h4v16H6zm8 0h4v16h-4z" />
-    </svg>
-);
-
-const PrevIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
-    </svg>
-);
-
-const NextIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-    </svg>
-);
-
+// Original Icons for Extras
 const VolumeIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
+    </svg>
+);
+
+const MuteIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z" />
     </svg>
 );
 
@@ -88,18 +83,6 @@ const PlaylistAddIcon = () => (
     </svg>
 );
 
-const Rewind10Icon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38" />
-    </svg>
-);
-
-const Forward10Icon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path d="M22 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38" />
-    </svg>
-);
-
 const LoopIcon = ({ active }: { active: boolean }) => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" opacity={active ? 1 : 0.4}>
         <path d="M17 1l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 23l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3" />
@@ -144,6 +127,8 @@ export default function Player({
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(0.8);
+    const [isMuted, setIsMuted] = useState(false);
+    const [prevVolume, setPrevVolume] = useState(0.8);
     const [isLoading, setIsLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
 
@@ -248,7 +233,22 @@ export default function Player({
     const handleVolumeClick = (e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect();
         const percent = (e.clientX - rect.left) / rect.width;
-        setVolume(Math.max(0, Math.min(1, percent)));
+        const newVolume = Math.max(0, Math.min(1, percent));
+        setVolume(newVolume);
+        if (newVolume > 0 && isMuted) {
+            setIsMuted(false);
+        }
+    };
+
+    const toggleMute = () => {
+        if (isMuted) {
+            setVolume(prevVolume);
+            setIsMuted(false);
+        } else {
+            setPrevVolume(volume);
+            setVolume(0);
+            setIsMuted(true);
+        }
     };
 
     const handleEnded = () => {
@@ -416,20 +416,22 @@ export default function Player({
                         <span className="progress-time">0:00</span>
                     </div>
                 </div>
-                <div className="player-extras">
-                    <button className="extra-button" disabled><DownloadIcon /></button>
-                    <button className="extra-button" disabled><HeartIcon filled={false} /></button>
-                    <button className="extra-button" disabled><PlaylistAddIcon /></button>
-                    <button className="extra-button" disabled><LoopIcon active={false} /></button>
-                    <button className="extra-button" disabled><SpeedIcon /></button>
-                    <button className="extra-button" disabled><VideoIcon /></button>
-                </div>
-                <div className="player-volume">
-                    <button className="volume-icon-button">
-                        <VolumeIcon />
-                    </button>
-                    <div className="volume-slider">
-                        <div className="volume-fill" style={{ width: '80%' }} />
+                <div className="player-right">
+                    <div className="player-extras">
+                        <button className="extra-button" disabled><DownloadIcon /></button>
+                        <button className="extra-button" disabled><HeartIcon filled={false} /></button>
+                        <button className="extra-button" disabled><PlaylistAddIcon /></button>
+                        <button className="extra-button" disabled><LoopIcon active={false} /></button>
+                        <button className="extra-button" disabled><SpeedIcon /></button>
+                        <button className="extra-button" disabled><VideoIcon /></button>
+                    </div>
+                    <div className="player-volume">
+                        <button className="volume-icon-button" onClick={toggleMute}>
+                            {isMuted || volume === 0 ? <MuteIcon /> : <VolumeIcon />}
+                        </button>
+                        <div className="volume-slider">
+                            <div className="volume-fill" style={{ width: '80%' }} />
+                        </div>
                     </div>
                 </div>
             </div>
@@ -501,74 +503,76 @@ export default function Player({
                 </div>
             </div>
 
-            <div className="player-extras">
-                <button
-                    className="extra-button"
-                    onClick={handleDownload}
-                    title="Download"
-                    disabled={!track}
-                >
-                    <DownloadIcon />
-                </button>
-                <button
-                    className={`extra-button ${isLiked ? 'active liked' : ''}`}
-                    onClick={handleLike}
-                    title={isLiked ? 'Unlike' : 'Like'}
-                    disabled={!track}
-                >
-                    <HeartIcon filled={isLiked} />
-                </button>
-                <button
-                    className="extra-button"
-                    onClick={handleAddToPlaylist}
-                    title="Add to Playlist"
-                    disabled={!track}
-                >
-                    <PlaylistAddIcon />
-                </button>
-                <button
-                    className={`extra-button ${isLooping ? 'active' : ''}`}
-                    onClick={toggleLoop}
-                    title={`Loop: ${isLooping ? 'On' : 'Off'}`}
-                    disabled={!track}
-                >
-                    <LoopIcon active={isLooping} />
-                </button>
-                <button
-                    className="extra-button speed-button"
-                    onClick={cycleSpeed}
-                    title={`Playback Speed: ${playbackSpeed}x`}
-                    disabled={!track}
-                >
-                    <SpeedIcon />
-                    {playbackSpeed !== 1 && (
-                        <span className="speed-indicator">{playbackSpeed}x</span>
-                    )}
-                </button>
-                <button
-                    className={`extra-button ${showVideo ? 'active' : ''}`}
-                    onClick={() => setShowVideo(!showVideo)}
-                    title={showVideo ? 'Hide Video' : 'Show Video'}
-                    disabled={!track}
-                >
-                    <VideoIcon />
-                </button>
-                <button
-                    className="extra-button"
-                    onClick={handleShowInfo}
-                    title="Track Info"
-                    disabled={!track}
-                >
-                    <InfoIcon />
-                </button>
-            </div>
+            <div className="player-right">
+                <div className="player-extras">
+                    <button
+                        className="extra-button"
+                        onClick={handleDownload}
+                        title="Download"
+                        disabled={!track}
+                    >
+                        <DownloadIcon />
+                    </button>
+                    <button
+                        className={`extra-button ${isLiked ? 'active liked' : ''}`}
+                        onClick={handleLike}
+                        title={isLiked ? 'Unlike' : 'Like'}
+                        disabled={!track}
+                    >
+                        <HeartIcon filled={isLiked} />
+                    </button>
+                    <button
+                        className="extra-button"
+                        onClick={handleAddToPlaylist}
+                        title="Add to Playlist"
+                        disabled={!track}
+                    >
+                        <PlaylistAddIcon />
+                    </button>
+                    <button
+                        className={`extra-button ${isLooping ? 'active' : ''}`}
+                        onClick={toggleLoop}
+                        title={`Loop: ${isLooping ? 'On' : 'Off'}`}
+                        disabled={!track}
+                    >
+                        <LoopIcon active={isLooping} />
+                    </button>
+                    <button
+                        className="extra-button speed-button"
+                        onClick={cycleSpeed}
+                        title={`Playback Speed: ${playbackSpeed}x`}
+                        disabled={!track}
+                    >
+                        <SpeedIcon />
+                        {playbackSpeed !== 1 && (
+                            <span className="speed-indicator">{playbackSpeed}x</span>
+                        )}
+                    </button>
+                    <button
+                        className={`extra-button ${showVideo ? 'active' : ''}`}
+                        onClick={() => setShowVideo(!showVideo)}
+                        title={showVideo ? 'Hide Video' : 'Show Video'}
+                        disabled={!track}
+                    >
+                        <VideoIcon />
+                    </button>
+                    <button
+                        className="extra-button"
+                        onClick={handleShowInfo}
+                        title="Track Info"
+                        disabled={!track}
+                    >
+                        <InfoIcon />
+                    </button>
+                </div>
 
-            <div className="player-volume">
-                <button className="volume-icon-button">
-                    <VolumeIcon />
-                </button>
-                <div className="volume-slider" onClick={handleVolumeClick}>
-                    <div className="volume-fill" style={{ width: `${volume * 100}%` }} />
+                <div className="player-volume">
+                    <button className="volume-icon-button" onClick={toggleMute}>
+                        {isMuted || volume === 0 ? <MuteIcon /> : <VolumeIcon />}
+                    </button>
+                    <div className="volume-slider" onClick={handleVolumeClick}>
+                        <div className="volume-fill" style={{ width: `${volume * 100}%` }} />
+                    </div>
                 </div>
             </div>
 

@@ -3,12 +3,12 @@
 import { useState, useEffect } from 'react';
 import { playlistsAPI } from '@/lib/apiClient';
 import { useMusic } from '@/contexts/MusicContext';
-import { ChevronDown, ChevronRight, Trash2, Plus, Pencil } from 'lucide-react';
+import { ChevronDown, ChevronRight, Trash2, Plus, Pencil, ArrowLeft, Play } from 'lucide-react';
 
 export default function PlaylistsPage() {
     const music = useMusic();
     const [playlists, setPlaylists] = useState<any[]>([]);
-    const [expandedPlaylistId, setExpandedPlaylistId] = useState<string | null>(null);
+    const [selectedPlaylist, setSelectedPlaylist] = useState<any | null>(null);
     const [playlistTracks, setPlaylistTracks] = useState<{ [key: string]: any[] }>({});
     const [loading, setLoading] = useState(true);
 
@@ -52,13 +52,13 @@ export default function PlaylistsPage() {
         }
     };
 
-    const togglePlaylist = (playlistId: string) => {
-        if (expandedPlaylistId === playlistId) {
-            setExpandedPlaylistId(null);
-        } else {
-            setExpandedPlaylistId(playlistId);
-            fetchPlaylistTracks(playlistId);
-        }
+    const handlePlaylistClick = (playlist: any) => {
+        setSelectedPlaylist(playlist);
+        fetchPlaylistTracks(playlist.id);
+    };
+
+    const handleBack = () => {
+        setSelectedPlaylist(null);
     };
 
     const handleCreatePlaylist = async (e: React.FormEvent) => {
@@ -156,88 +156,115 @@ export default function PlaylistsPage() {
                     <h1 className="page-title">My Playlists</h1>
                     <p className="page-subtitle">Create and manage your music collections</p>
                 </div>
-                <button className="btn-primary" onClick={() => setShowCreateModal(true)}>
-                    <Plus size={16} />
+                <button className="btn-small primary" onClick={() => setShowCreateModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <Plus size={14} />
                     Create Playlist
                 </button>
             </div>
 
             {loading ? (
                 <div className="loading"><div className="loading-spinner" /></div>
-            ) : playlists.length === 0 ? (
-                <div className="empty-state">
-                    <p className="empty-text">No playlists yet. Create one to get started!</p>
+            ) : selectedPlaylist ? (
+                // Detail View
+                <div className="playlist-detail-view">
+                    <div className="playlist-detail-header">
+                        <div className="playlist-detail-left">
+                            <button className="back-button" onClick={handleBack}>
+                                <ArrowLeft size={18} />
+                            </button>
+                            <div>
+                                <h2 className="playlist-detail-title">{selectedPlaylist.name}</h2>
+                                {selectedPlaylist.description && (
+                                    <p className="playlist-detail-desc">{selectedPlaylist.description}</p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="playlist-actions">
+                            <button
+                                onClick={(e) => handleEditClick(selectedPlaylist, e)}
+                                className="playlist-action-btn"
+                                title="Edit Playlist"
+                            >
+                                <Pencil size={16} />
+                            </button>
+                            <button
+                                onClick={(e) => {
+                                    handleDeletePlaylist(selectedPlaylist.id);
+                                    setSelectedPlaylist(null);
+                                }}
+                                className="playlist-action-btn delete"
+                                title="Delete Playlist"
+                            >
+                                <Trash2 size={16} />
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="playlist-tracks-list">
+                        {!playlistTracks[selectedPlaylist.id] ? (
+                            <div className="loading-small">Loading tracks...</div>
+                        ) : playlistTracks[selectedPlaylist.id].length === 0 ? (
+                            <div className="empty-tracks">No tracks in this playlist yet</div>
+                        ) : (
+                            playlistTracks[selectedPlaylist.id].map((track: any, index: number) => (
+                                <div
+                                    key={track.id}
+                                    className={`playlist-track-row clickable ${music.currentTrack?.id === track.trackId ? 'playing' : ''}`}
+                                    onClick={() => handlePlayTrack(selectedPlaylist.id, track, playlistTracks[selectedPlaylist.id])}
+                                >
+                                    <span className="track-index">{index + 1}</span>
+                                    <img src={track.thumbnail} alt={track.title} className="track-thumb-small" />
+                                    <div className="track-info-col">
+                                        <h4 className="track-name-row">{track.title}</h4>
+                                        <p className="track-artist-row">{track.artist}</p>
+                                    </div>
+                                    <span className="track-duration-row">{track.duration}</span>
+                                    <button
+                                        onClick={(e) => handleRemoveTrack(selectedPlaylist.id, track.trackId, e)}
+                                        className="remove-track-btn"
+                                        title="Remove from playlist"
+                                    >
+                                        <Trash2 size={14} />
+                                    </button>
+                                </div>
+                            ))
+                        )}
+                    </div>
                 </div>
             ) : (
-                <div className="playlists-list">
-                    {playlists.map(playlist => (
-                        <div key={playlist.id} className="playlist-box">
-                            <div className="playlist-header" onClick={() => togglePlaylist(playlist.id)}>
-                                <div className="playlist-info-section">
-                                    <button className="playlist-toggle">
-                                        {expandedPlaylistId === playlist.id ?
-                                            <ChevronDown size={20} /> : <ChevronRight size={20} />
-                                        }
-                                    </button>
-                                    <div>
-                                        <h3 className="playlist-name">{playlist.name}</h3>
-                                        {playlist.description && (
-                                            <p className="playlist-desc">{playlist.description}</p>
-                                        )}
-                                    </div>
-                                </div>
-                                <div className="playlist-actions" style={{ display: 'flex', gap: '8px' }}>
-                                    <button
-                                        onClick={(e) => handleEditClick(playlist, e)}
-                                        className="playlist-delete"
-                                        title="Edit Playlist"
-                                    >
-                                        <Pencil size={16} />
-                                    </button>
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleDeletePlaylist(playlist.id); }}
-                                        className="playlist-delete"
-                                        title="Delete Playlist"
-                                    >
-                                        <Trash2 size={16} />
-                                    </button>
-                                </div>
-                            </div>
-
-                            {expandedPlaylistId === playlist.id && (
-                                <div className="playlist-tracks">
-                                    {!playlistTracks[playlist.id] ? (
-                                        <div className="loading-small">Loading tracks...</div>
-                                    ) : playlistTracks[playlist.id].length === 0 ? (
-                                        <div className="empty-tracks">No tracks in this playlist yet</div>
-                                    ) : (
-                                        playlistTracks[playlist.id].map((track: any) => (
-                                            <div
-                                                key={track.id}
-                                                className={`playlist-track-item clickable ${music.currentTrack?.id === track.trackId ? 'playing' : ''}`}
-                                                onClick={() => handlePlayTrack(playlist.id, track, playlistTracks[playlist.id])}
-                                            >
-                                                <img src={track.thumbnail} alt={track.title} className="track-thumb" />
-                                                <div className="track-details">
-                                                    <h4 className="track-name">{track.title}</h4>
-                                                    <p className="track-artist-name">{track.artist}</p>
-                                                </div>
-                                                <span className="track-time">{track.duration}</span>
-                                                <button
-                                                    onClick={(e) => handleRemoveTrack(playlist.id, track.trackId, e)}
-                                                    className="remove-track-btn"
-                                                    title="Remove from playlist"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                        ))
-                                    )}
-                                </div>
-                            )}
+                // Grid View
+                <>
+                    {playlists.length === 0 ? (
+                        <div className="empty-state">
+                            <p className="empty-text">No playlists yet. Create one to get started!</p>
                         </div>
-                    ))}
-                </div>
+                    ) : (
+                        <div className="playlists-grid">
+                            {playlists.map(playlist => {
+                                const coverImage = playlist.tracks?.find((t: any) => t.thumbnail)?.thumbnail;
+                                return (
+                                    <div
+                                        key={playlist.id}
+                                        className={`playlist-card ${coverImage ? 'has-cover' : ''}`}
+                                        onClick={() => handlePlaylistClick(playlist)}
+                                        style={coverImage ? { backgroundImage: `url(${coverImage})` } : {}}
+                                    >
+                                        <div className="playlist-card-overlay" />
+                                        <div className="playlist-card-content">
+                                            <h3 className="playlist-card-title">{playlist.name}</h3>
+                                            <p className="playlist-card-count">
+                                                {playlist.tracks?.length || 0} songs
+                                            </p>
+                                        </div>
+                                        <div className="playlist-card-hover">
+                                            <Play size={24} fill="currentColor" />
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Create Playlist Modal */}

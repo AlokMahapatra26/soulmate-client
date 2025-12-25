@@ -9,8 +9,10 @@ import {
   Compass,
   Globe,
   X,
-  Shuffle
+  Shuffle,
+  ArrowLeft
 } from 'lucide-react';
+import Lyrics from '@/components/Lyrics';
 import {
   MUSIC_TRIVIA,
   CHAOS_QUERIES,
@@ -33,6 +35,7 @@ export default function Home() {
   const [showLanguageModal, setShowLanguageModal] = useState(false);
   const [selectedLanguages, setSelectedLanguages] = useState<string[]>([]);
   const [trivia, setTrivia] = useState({ type: "", text: "" });
+  const [showMobileLyrics, setShowMobileLyrics] = useState(false);
 
   useEffect(() => {
     setTrivia(MUSIC_TRIVIA[Math.floor(Math.random() * MUSIC_TRIVIA.length)]);
@@ -155,7 +158,33 @@ export default function Home() {
 
       {!hasSearched && (
         <div className="empty-state-container">
-          <div className="music-quote">
+          {music.currentTrack && (
+            showMobileLyrics ? (
+              <div className="mobile-lyrics-view">
+                <button className="mobile-lyrics-back" onClick={() => setShowMobileLyrics(false)}>
+                  <ArrowLeft size={16} />
+                  <span>Back to Art</span>
+                </button>
+                <div className="mobile-lyrics-content">
+                  <Lyrics
+                    track={music.currentTrack}
+                    currentTime={music.currentTime}
+                    isVisible={true}
+                    onClose={() => setShowMobileLyrics(false)}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="mobile-home-poster" onClick={() => setShowMobileLyrics(true)}>
+                <img src={music.currentTrack.thumbnailHD || music.currentTrack.thumbnail} alt={music.currentTrack.title} />
+                <div className="poster-overlay-hint">
+                  <span>Tap for Lyrics</span>
+                </div>
+              </div>
+            )
+          )}
+
+          <div className={`music-quote ${music.currentTrack ? 'has-track-mobile' : ''}`}>
             <span className="trivia-type">{trivia.type}</span>
             <p>"{trivia.text}"</p>
           </div>
@@ -285,7 +314,10 @@ export default function Home() {
         <TrackList
           tracks={tracks}
           currentTrack={music.currentTrack}
-          onTrackSelect={music.playTrack}
+          onTrackSelect={(track) => {
+            music.setQueue(tracks);
+            music.playTrack(track);
+          }}
           onAddToQueue={music.addToQueue}
         />
       )}

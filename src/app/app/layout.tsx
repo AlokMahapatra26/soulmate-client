@@ -11,13 +11,14 @@ import Lyrics from '@/components/Lyrics';
 import VideoPlayer from '@/components/VideoPlayer';
 
 import { useTheme } from 'next-themes';
-import { Sun, Moon } from 'lucide-react';
+import { Sun, Moon, Home, ListMusic, Heart, History, Code, Shield, User, LogOut, Infinity } from 'lucide-react';
 
 function AppLayoutContent({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const { user, isLoading, isAuthenticated, logout } = useAuth();
     const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
     const music = useMusic();
     const { theme, setTheme } = useTheme();
 
@@ -54,12 +55,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
         );
     }
 
-    const UserIcon = () => (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-            <circle cx="12" cy="7" r="4" />
-        </svg>
-    );
+
 
     const isActive = (path: string) => pathname === path;
 
@@ -68,7 +64,8 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
             {/* Fixed Navbar */}
             <nav className="navbar fixed-navbar">
                 <Link href="/app" className="navbar-logo">
-                    SOUL<span className="navbar-logo-accent">MATE</span>
+                    <Infinity size={28} strokeWidth={2.5} />
+                    <span>Soulmate</span>
                 </Link>
 
                 <div className="navbar-menu">
@@ -76,42 +73,42 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                         href="/app"
                         className={`navbar-link ${isActive('/app') ? 'active' : ''}`}
                     >
-                        Player
+                        <Home size={18} />
+                        <span>Home</span>
                     </Link>
                     <Link
                         href="/app/playlists"
                         className={`navbar-link ${isActive('/app/playlists') ? 'active' : ''}`}
                     >
-                        Playlists
+                        <ListMusic size={18} />
+                        <span>Playlists</span>
                     </Link>
                     <Link
                         href="/app/liked"
                         className={`navbar-link ${isActive('/app/liked') ? 'active' : ''}`}
                     >
-                        Liked
+                        <Heart size={18} />
+                        <span>Liked</span>
                     </Link>
                     <Link
                         href="/app/history"
                         className={`navbar-link ${isActive('/app/history') ? 'active' : ''}`}
                     >
-                        History
+                        <History size={18} />
+                        <span>History</span>
                     </Link>
                     <Link
                         href="/app/developer"
                         className={`navbar-link ${isActive('/app/developer') ? 'active' : ''}`}
                     >
-                        Developer
+                        <Code size={18} />
+                        <span>Developer</span>
                     </Link>
-                    {/* <Link
-                        href="/app/friends"
-                        className={`navbar-link ${isActive('/app/friends') ? 'active' : ''}`}
-                    >
-                        Friends
-                    </Link> */}
 
                     {user?.role === 'admin' && (
                         <Link href="/admin" className="navbar-link admin">
-                            Admin
+                            <Shield size={18} />
+                            <span>Admin</span>
                         </Link>
                     )}
 
@@ -129,7 +126,7 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                             className="user-menu-button"
                             onClick={() => setShowUserMenu(!showUserMenu)}
                         >
-                            <UserIcon />
+                            <User size={20} />
                             <span>{user?.name}</span>
                         </button>
 
@@ -201,6 +198,67 @@ function AppLayoutContent({ children }: { children: React.ReactNode }) {
                     onAudioReady={music.setAudioElement}
                     onPlayingStateChange={music.setIsPlaying}
                 />
+            </div>
+
+            {/* Mobile Menu Popup */}
+            {showMobileMenu && (
+                <>
+                    <div className="mobile-menu-backdrop" onClick={() => setShowMobileMenu(false)} />
+                    <div className="mobile-menu-popup">
+                        <Link href="/app/profile" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
+                            <User size={18} />
+                            <span>Profile</span>
+                        </Link>
+                        <Link href="/app/developer" className="mobile-menu-item" onClick={() => setShowMobileMenu(false)}>
+                            <Code size={18} />
+                            <span>Developer</span>
+                        </Link>
+                        <button className="mobile-menu-item danger" onClick={() => { logout(); router.push('/landing'); }}>
+                            <LogOut size={18} />
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
+                </>
+            )}
+
+            {/* Mobile Bottom Navigation */}
+            <div className="mobile-bottom-nav">
+                <Link
+                    href="/app"
+                    className={`mobile-nav-item ${isActive('/app') ? 'active' : ''}`}
+                >
+                    <Home size={20} />
+                    <span>Home</span>
+                </Link>
+                <Link
+                    href="/app/playlists"
+                    className={`mobile-nav-item ${isActive('/app/playlists') ? 'active' : ''}`}
+                >
+                    <ListMusic size={20} />
+                    <span>Playlists</span>
+                </Link>
+                <Link
+                    href="/app/liked"
+                    className={`mobile-nav-item ${isActive('/app/liked') ? 'active' : ''}`}
+                >
+                    <Heart size={20} />
+                    <span>Liked</span>
+                </Link>
+                <Link
+                    href="/app/history"
+                    className={`mobile-nav-item ${isActive('/app/history') ? 'active' : ''}`}
+                >
+                    <History size={20} />
+                    <span>History</span>
+                </Link>
+                <button
+                    className={`mobile-nav-item ${showMobileMenu ? 'active' : ''}`}
+                    onClick={() => setShowMobileMenu(!showMobileMenu)}
+                    style={{ background: 'transparent', border: 'none', padding: 0 }}
+                >
+                    <User size={20} />
+                    <span>Me</span>
+                </button>
             </div>
         </div>
     );
