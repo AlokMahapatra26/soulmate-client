@@ -9,6 +9,7 @@ interface User {
     name: string;
     role: string;
     status: string;
+    createdAt?: string;
 }
 
 interface AuthContextType {
